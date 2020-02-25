@@ -3,7 +3,7 @@
 // Load the SDK
 const AWS = require('aws-sdk')
 const Fs = require('fs')
-
+const mp3Duration = require('mp3-duration');
 AWS.config.loadFromPath('./config.json');
 
 // Create an Polly client
@@ -13,7 +13,7 @@ const Polly = new AWS.Polly({
 })
 
 let params = {
-    'Text': '今日はとっても天気がいいですね。外に遊びにいきたいなー',
+    'Text': '今日はとっても天気がいいですね。外に遊びにいきたいなー。どうもですす！！',
     // 'Engine': 'neural',
     'LanguageCode': 'ja-JP',
     'OutputFormat': 'mp3',
@@ -30,6 +30,12 @@ Polly.synthesizeSpeech(params, (err, data) => {
                     return console.log(err)
                 }
                 console.log("The file was saved!")
+
+                mp3Duration('./speech.mp3', function (err, duration) {
+                    if (err) return console.log(err.message);
+                    console.log('Your file is ' + duration * 1000 + ' ms long');
+                  });
+               
             })
         }
     }
