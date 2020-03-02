@@ -22,12 +22,9 @@ let params = {
 }
 
 let texts = [
-    "テスト1",
-    "テスト2",
-    "テスト3",
-    "テスト4",
-    "テスト5",
-    "テスト6",
+   {id: 1, text: "テスト1"},
+   {id: 2, text: "テスト2"},
+   {id: 3, text: "テスト3"}
 ]
 
 const outputFileName = 'out.mp3'
@@ -38,9 +35,8 @@ converTextsToMP3(texts)
 async function converTextsToMP3(texts){
 
     try{
-        await joinMP3(`rm ${outputFileName}`)
         for(let i = 0; i < texts.length; i++) {
-            params.Text = texts[i]
+            params.Text = texts[i].text
             const fileName = `./file_${i}.mp3`
             command += `-i ${fileName} `
             await getM3data(params, fileName)
