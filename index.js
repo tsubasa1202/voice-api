@@ -4,6 +4,7 @@
 const AWS = require('aws-sdk')
 const Fs = require('fs')
 const mp3Duration = require('mp3-duration');
+const { exec } = require('child_process')
 AWS.config.loadFromPath('./config.json');
 
 // Create an Polly client
@@ -13,30 +14,91 @@ const Polly = new AWS.Polly({
 })
 
 let params = {
-    'Text': '今日はとっても天気がいいですね。外に遊びにいきたいなー。どうもですす！！',
+    'Text': '',
     // 'Engine': 'neural',
     'LanguageCode': 'ja-JP',
     'OutputFormat': 'mp3',
-    'VoiceId': 'Takumi' // Takumi Mizuki
+    'VoiceId': 'Mizuki' // Takumi Mizuki
 }
 
-Polly.synthesizeSpeech(params, (err, data) => {
-    if (err) {
-        console.log(err.code)
-    } else if (data) {
-        if (data.AudioStream instanceof Buffer) {
-            Fs.writeFile("./speech.mp3", data.AudioStream, function(err) {
-                if (err) {
-                    return console.log(err)
-                }
-                console.log("The file was saved!")
+let texts = [
+    "テスト1",
+    "テスト2",
+    "テスト3",
+    "テスト4",
+    "テスト5",
+    "テスト6",
+]
 
-                mp3Duration('./speech.mp3', function (err, duration) {
-                    if (err) return console.log(err.message);
-                    console.log('Your file is ' + duration * 1000 + ' ms long');
-                  });
-               
-            })
+const outputFileName = 'out.mp3'
+let command = 'ffmpeg '
+
+converTextsToMP3(texts)
+
+async function converTextsToMP3(texts){
+
+    try{
+        await joinMP3(`rm ${outputFileName}`)
+        for(let i = 0; i < texts.length; i++) {
+            params.Text = texts[i]
+            const fileName = `./file_${i}.mp3`
+            command += `-i ${fileName} `
+            await getM3data(params, fileName)
+            const duration = await getMP3duration(fileName)
+            console.log(fileName + ' ' + duration * 1000 + ' ms long');
         }
+
+        command  += ` -filter_complex "concat=n=${texts.length}:v=0:a=1" ${outputFileName}`
+        console.log(command)
+        await joinMP3(command)
+    }catch(e){
+        console.error(e)
     }
-})
+}
+
+function getM3data(params, fileName){
+    return new Promise(function (resolve, reject) {
+        Polly.synthesizeSpeech(params, (err, data) => {
+            if (err) {
+                reject(err)
+            }
+            
+            if (data.AudioStream instanceof Buffer) {
+                Fs.writeFile(fileName, data.AudioStream, function(err) {
+                    if (err) {
+                        reject(err)
+                    }else{
+                        console.log("The file was saved!")
+                        resolve()
+                    }
+                })
+            }
+
+        })
+      })
+}
+
+function getMP3duration(fileName){
+    return new Promise(function (resolve, reject) {
+        mp3Duration(fileName, function (err, duration) {
+            if (err){
+                reject(err)
+            }else{
+                resolve(duration)
+            }
+          });
+      })
+}
+
+function joinMP3(cmd){
+    return new Promise(function (resolve, reject) {
+        exec(cmd, (err, stdout, stderr) => {
+            if (err) {
+                reject(err)
+            }
+                console.log("success")
+                resolve("")
+            }
+        )
+      })
+}
