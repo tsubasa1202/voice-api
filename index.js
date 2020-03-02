@@ -28,11 +28,11 @@ let texts = [
 ]
 
 const outputFileName = 'out.mp3'
-let command = 'ffmpeg '
 
+// converTextsToMP3(texts)
 
 // 出力結果は消してから実行
-async function converTextsToMP3(texts){
+async function converTextsToMP3(texts, command){
 
     let result = []
 
@@ -40,7 +40,7 @@ async function converTextsToMP3(texts){
         for(let i = 0; i < texts.length; i++) {
             params.Text = texts[i].text
             const fileName = `./file_${i}.mp3`
-            command += `-i ${fileName} `
+            command += `-i line.mp3 -i ${fileName} `
             await getM3data(params, fileName)
             const duration = await getMP3duration(fileName)
             result.push(
@@ -49,7 +49,7 @@ async function converTextsToMP3(texts){
             console.log(fileName + ' ' + duration * 1000 + ' ms long');
         }
 
-        command  += ` -filter_complex "concat=n=${texts.length}:v=0:a=1" ${outputFileName}`
+        command  += ` -filter_complex "concat=n=${texts.length * 2}:v=0:a=1" ${outputFileName}`
         console.log(command)
         await joinMP3(command)
         return result
@@ -106,12 +106,14 @@ function joinMP3(cmd){
 }
 
 
+
 var http = require('http')
 var server = http.createServer();
 
 server.on('request', async function(req, res) {
 
-    const result = await converTextsToMP3(texts)
+    let command = 'ffmpeg '
+    const result = await converTextsToMP3(texts, command)
 
     res.writeHead(200, {'Content-Type' : 'application/json'});
     res.write(JSON.stringify(result));
