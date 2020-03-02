@@ -89,7 +89,7 @@ function getMP3duration(fileName){
             if (err){
                 reject(err)
             }else{
-                resolve(duration)
+                resolve(duration * 1000) // ms
             }
           });
       })
