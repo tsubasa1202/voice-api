@@ -18,7 +18,7 @@ let params = {
     // 'Engine': 'neural',
     'LanguageCode': 'ja-JP',
     'OutputFormat': 'mp3',
-    'VoiceId': 'Mizuki' // Takumi Mizuki
+    'VoiceId': 'Takumi' // Takumi Mizuki
 }
 
 let texts = [
@@ -46,7 +46,7 @@ async function converTextsToMP3(texts, command){
             await getM3data(params, fileName)
             const duration = await getMP3duration(fileName)
             result.push(
-                {id: texts[i].id, duration: duration}
+                {id: texts[i].id, time: duration}
             )
             console.log(fileName + ' ' + duration * 1000 + ' ms long');
         }
