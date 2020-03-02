@@ -29,7 +29,9 @@ let texts = [
 
 const outputFileName = 'out.mp3'
 
-// converTextsToMP3(texts)
+let command = 'ffmpeg '
+converTextsToMP3(texts, command)
+
 
 // 出力結果は消してから実行
 async function converTextsToMP3(texts, command){
@@ -52,6 +54,7 @@ async function converTextsToMP3(texts, command){
         command  += ` -filter_complex "concat=n=${texts.length * 2}:v=0:a=1" ${outputFileName}`
         console.log(command)
         await joinMP3(command)
+        console.log(JSON.stringify(result))
         return result
     }catch(e){
         console.error(e)
@@ -107,6 +110,7 @@ function joinMP3(cmd){
 
 
 
+/*
 var http = require('http')
 var server = http.createServer();
 
@@ -121,3 +125,4 @@ server.on('request', async function(req, res) {
 });
 
 server.listen(3000);
+*/
